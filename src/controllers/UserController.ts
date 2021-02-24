@@ -1,23 +1,22 @@
 import { Request, Response } from "express";
-import { getRepository } from "typeorm";
-import { User } from "../models/User";
+import { getCustomRepository } from "typeorm";
+import { UsersRepository } from "../repositories/UserRepository";
 
 class UserController {
     async create(req: Request, res: Response) {
         const { name, email } = req.body;
 
-        const usersRepository = getRepository(User);
+        const usersRepository = getCustomRepository(UsersRepository);
         const userAlreadyExists = await usersRepository.findOne({ email });
+
         if (userAlreadyExists) {
             return res.status(400).json({ error: "User already exists!" })
         }
-        const user = usersRepository.create({
-            name, email
-        });
 
+        const user = usersRepository.create({ name, email });
         await usersRepository.save(user);
 
-        return res.json(user);
+        return res.status(201).json(user);
 
     }
 }
